@@ -93,7 +93,7 @@ runs:
       run: |
         terraform init -upgrade ${{ inputs.init_args }}
 
-    - uses: actions/upload-artifact@master
+    - uses: CSVD/gh-upload-artifact@master
       name: Archive Configuration
       with:
         name: terraform_dir
@@ -101,7 +101,7 @@ runs:
         retention-days: 1
         include-hidden-files: true
 
-    - uses: actions/upload-artifact@master
+    - uses: CSVD/gh-upload-artifact@master
       name: Archive Lockfile
       with:
         name: terraform_lockfile
