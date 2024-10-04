@@ -1,4 +1,4 @@
-name: "Terraform Pipeline Plan"
+name: "Terraform Plan"
 description: "Runs a Terraform Plan"
 inputs:
   terraform_version:
