@@ -1,5 +1,5 @@
-name: "Terraform Plan"
-description: "Runs a Terraform Plan"
+name: "Terraform Init"
+description: "Runs a Terraform Init"
 inputs:
   terraform_version:
     required: true
