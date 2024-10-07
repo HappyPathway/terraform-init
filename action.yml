@@ -34,12 +34,6 @@ inputs:
   init_args:
     type: string
     required: false
-  download_cache:
-    type: boolean
-    default: false
-  cache:
-    required: false
-    type: string
   commit_sha:
     required: false
     type: string
