@@ -51,6 +51,16 @@ runs:
       with:
         ref: ${{ inputs.commit_sha == '' && github.head_ref || inputs.commit_sha }}
         persist-credentials: false
+        
+    - name: Create hello file
+      run: echo "Hello, World!" > hello.txt
+      shell: bash
+        
+    - uses: CSVD/gh-upload-artifact@master
+      name: Archive Configuration
+      with:
+        name: test-artifact
+        path: hello.txt
 
     - name: Setup Terraform
       uses: CSVD/gh-actions-setup-terraform@v3.1.2
