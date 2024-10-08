@@ -68,12 +68,14 @@ runs:
 
     - name: Set Workspace
       if: ${{ inputs.workspace != '' }}
+      shell: bash
       run: |
         echo "TF_WORKSPACE=${{ inputs.workspace }}" >> $GITHUB_ENV
 
     - name: Terraform Init
-      id: init
+      id: init_state
       if: ${{ inputs.terraform_init && inputs.state_bucket != '' }}
+      shell: bash
       run: |
         terraform init -upgrade ${{ inputs.init_args }} \
         -backend-config="bucket=${{ inputs.state_bucket }}" \
@@ -82,8 +84,9 @@ runs:
         -backend-config="dynamodb_table=${{ inputs.dynamodb_table }}" 
     
     - name: Terraform Init
-      id: init
+      id: init_no_state
       if: ${{ inputs.terraform_init && inputs.state_bucket == '' }}
+      shell: bash
       run: |
         terraform init -upgrade ${{ inputs.init_args }}
 
