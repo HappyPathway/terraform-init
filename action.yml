@@ -56,6 +56,12 @@ runs:
         ref: ${{ inputs.commit_sha == '' && github.sha || inputs.commit_sha }}
         persist-credentials: false
 
+    - name: generate uuid
+      id: uuid
+      uses: CSVD/gh-uuid
+      with:
+        name: ${{ gihub.sha }}
+    
     - name: Setup Terraform
       uses: CSVD/gh-actions-setup-terraform@v2
       if: ${{ inputs.setup_terraform && env.TFE_TOKEN != '' }}
@@ -101,7 +107,7 @@ runs:
         source: .terraform
         bucket: image-pipeline-assets
         archive: true
-        key: ${{ github.repository }}-${{ inputs.workspace }}/${{ steps.checkout.output.commit }}/terraform-dir
+        key: ${{ github.repository }}-${{ inputs.workspace }}/${{ steps.uuid.output.uuid }}/terraform-dir
         
     - uses: CSVD/s3-upload@main
       name: Upload .terraform
@@ -110,7 +116,7 @@ runs:
         source: .terraform
         bucket: image-pipeline-assets
         archive: true
-        key: ${{ github.repository }}/${{ steps.checkout.output.commit }}/terraform-dir
+        key: ${{ github.repository }}/${{ steps.uuid.output.uuid  }}/terraform-dir
     
     - uses: CSVD/s3-upload@main
       name: Upload .terraform
@@ -119,7 +125,7 @@ runs:
         source: .terraform.lock.hcl
         bucket: image-pipeline-assets
         archive: false
-        key: ${{ github.repository }}-${{ inputs.workspace }}/${{ steps.checkout.output.commit }}/terraform.lock.hcl
+        key: ${{ github.repository }}-${{ inputs.workspace }}/${{ steps.uuid.output.uuid }}/terraform.lock.hcl
         
     - uses: CSVD/s3-upload@main
       name: Upload .terraform
@@ -128,4 +134,4 @@ runs:
         source: .terraform.lock.hcl
         bucket: image-pipeline-assets
         archive: false
-        key: ${{ github.repository }}/${{ steps.checkout.output.commit }}/terraform.lock.hcl
+        key: ${{ github.repository }}/${{ steps.uuid.output.uuid }}/terraform.lock.hcl
