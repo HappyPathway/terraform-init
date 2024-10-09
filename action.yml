@@ -37,6 +37,10 @@ inputs:
   commit_sha:
     required: false
     type: string
+  cache_bucket:
+    required: false
+    type: string
+    default: image-pipeline-assets
 
 outputs:
   commit_sha:
@@ -97,7 +101,7 @@ runs:
         source: .terraform
         bucket: image-pipeline-assets
         archive: true
-        key: ${{ github.repository }}-${{ inputs.workspace }}/.terraform
+        key: ${{ github.repository }}-${{ inputs.workspace }}/terraform-dir
         
     - uses: CSVD/s3-upload@main
       name: Upload .terraform
@@ -106,7 +110,7 @@ runs:
         source: .terraform
         bucket: image-pipeline-assets
         archive: true
-        key: ${{ github.repository }}/.terraform
+        key: ${{ github.repository }}/terraform-dir
     
     - uses: CSVD/s3-upload@main
       name: Upload .terraform
@@ -115,7 +119,7 @@ runs:
         source: .terraform.lock.hcl
         bucket: image-pipeline-assets
         archive: false
-        key: ${{ github.repository }}-${{ inputs.workspace }}/.terraform.lock.hcl
+        key: ${{ github.repository }}-${{ inputs.workspace }}/terraform.lock.hcl
         
     - uses: CSVD/s3-upload@main
       name: Upload .terraform
@@ -124,4 +128,4 @@ runs:
         source: .terraform.lock.hcl
         bucket: image-pipeline-assets
         archive: false
-        key: ${{ github.repository }}/.terraform.lock.hcl
+        key: ${{ github.repository }}/terraform.lock.hcl
