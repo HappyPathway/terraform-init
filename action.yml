@@ -92,14 +92,36 @@ runs:
 
     - uses: CSVD/s3-upload@main
       name: Upload .terraform
+      if: ${{ inputs.workspace != '' }}
       with:
         source: .terraform
         bucket: image-pipeline-assets
         archive: true
+        key: ${{ github.repository }}-${{ inputs.workspace }}/.terraform
+        
+    - uses: CSVD/s3-upload@main
+      name: Upload .terraform
+      if: ${{ inputs.workspace == '' }}
+      with:
+        source: .terraform
+        bucket: image-pipeline-assets
+        archive: true
+        key: ${{ github.repository }}/.terraform
     
     - uses: CSVD/s3-upload@main
       name: Upload .terraform
+      if: ${{ inputs.workspace != '' }}
       with:
         source: .terraform.lock.hcl
         bucket: image-pipeline-assets
         archive: false
+        key: ${{ github.repository }}-${{ inputs.workspace }}/.terraform.lock.hcl
+        
+    - uses: CSVD/s3-upload@main
+      name: Upload .terraform
+      if: ${{ inputs.workspace == '' }}
+      with:
+        source: .terraform.lock.hcl
+        bucket: image-pipeline-assets
+        archive: false
+        key: ${{ github.repository }}/.terraform.lock.hcl
