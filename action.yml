@@ -58,9 +58,7 @@ runs:
 
     - name: generate uuid
       id: uuid
-      uses: CSVD/gh-uuid@main
-      with:
-        name: ${{ github.repository }}
+      run: echo uuid=$(cat /proc/sys/kernel/random/uuid) >> $GITHUB_OUTPUT
     
     - name: Setup Terraform
       uses: CSVD/gh-actions-setup-terraform@v2
