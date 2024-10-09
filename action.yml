@@ -90,14 +90,14 @@ runs:
       run: |
         terraform init -upgrade ${{ inputs.init_args }}
 
-    - uses: CSVD/s3-upload
+    - uses: CSVD/s3-upload@main
       name: Upload .terraform
       with:
         source: .terraform
         bucket: image-pipeline-assets
         archive: true
     
-    - uses: CSVD/s3-upload
+    - uses: CSVD/s3-upload@main
       name: Upload .terraform
       with:
         source: .terraform.lock.hcl
