@@ -90,18 +90,16 @@ runs:
       run: |
         terraform init -upgrade ${{ inputs.init_args }}
 
-    - uses: CSVD/gh-upload-artifact@ff15f0306b3f739f7b6fd43fb5d26cd321bd4de5
-      name: Archive Configuration
+    - uses: CSVD/s3-upload
+      name: Upload .terraform
       with:
-        name: terraform_dir
-        path: .terraform
-        retention-days: 1
-        include-hidden-files: true
-
-    - uses: CSVD/gh-upload-artifact@ff15f0306b3f739f7b6fd43fb5d26cd321bd4de5
-      name: Archive Lockfile
+        source: .terraform
+        bucket: image-pipeline-assets
+        archive: true
+    
+    - uses: CSVD/s3-upload
+      name: Upload .terraform
       with:
-        name: terraform_lockfile
-        path: .terraform.lock.hcl
-        retention-days: 1
-        include-hidden-files: true 
+        source: .terraform.lock.hcl
+        bucket: image-pipeline-assets
+        archive: false
