@@ -60,7 +60,7 @@ runs:
       id: uuid
       uses: CSVD/gh-uuid@main
       with:
-        name: ${{ inputs.commit_sha == '' && github.sha || inputs.commit_sha }}
+        name: ${{ github.repository }}
     
     - name: Setup Terraform
       uses: CSVD/gh-actions-setup-terraform@v2
