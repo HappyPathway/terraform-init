@@ -53,7 +53,7 @@ runs:
     - uses: CSVD/gh-actions-checkout@v4
       id: checkout
       with:
-        ref: ${{ inputs.commit_sha == '' && github.head_ref || inputs.commit_sha }}
+        ref: ${{ inputs.commit_sha == '' && github.sha || inputs.commit_sha }}
         persist-credentials: false
 
     - name: Setup Terraform
