@@ -58,7 +58,7 @@ runs:
 
     - name: generate uuid
       id: uuid
-      uses: CSVD/gh-uuid
+      uses: CSVD/gh-uuid@main
       with:
         name: ${{ inputs.commit_sha == '' && github.sha || inputs.commit_sha }}
     
