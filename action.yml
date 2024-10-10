@@ -79,7 +79,7 @@ runs:
 
     - name: Terraform Init
       id: init_state
-      if: ${{ inputs.terraform_ini t== 'true' && inputs.state_bucket != '' }}
+      if: ${{ inputs.terraform_init == 'true' && inputs.state_bucket != '' }}
       shell: bash
       run: |
         terraform init -upgrade ${{ inputs.init_args }} \
