@@ -3,49 +3,38 @@ description: "Runs a Terraform Init"
 inputs:
   terraform_version:
     required: true
-    type: string
   terraform_api:
     required: false
-    type: string
   workspace:
     required: false
-    type: string
   varfile:
     required: false
-    type: string
   setup_terraform:
-    type: boolean
     default: false
   terraform_init:
-    type: boolean
+    default: false
+  checkout:
     default: false
   state_bucket:
-    type: string
     required: false
   state_region:
-    type: string
     required: false
   state_prefix:
-    type: string
     required: false
   state_dynamodb_table:
-    type: string
     required: false
   init_args:
-    type: string
     required: false
   commit_sha:
     required: false
-    type: string
   cache_bucket:
     required: false
-    type: string
     default: image-pipeline-assets
 
 outputs:
   commit_sha:
     description: "Commit SHA"
-    value: ${{ steps.checkout.outputs.commit }}
+    value: ${{ inputs.commit_sha == '' && github.sha || inputs.commit_sha }}
   s3_upload_path:
     description: "S3 Path for .terraform directory"
     value: ${{ steps.s3_upload_path.outputs.s3_upload_path }}
@@ -54,6 +43,7 @@ runs:
   using: "composite"
   steps:
     - uses: CSVD/gh-actions-checkout@v4
+      if: ${{ inputs.checkout == 'true' }}
       id: checkout
       with:
         ref: ${{ inputs.commit_sha == '' && github.sha || inputs.commit_sha }}
@@ -69,7 +59,7 @@ runs:
     
     - name: Setup Terraform
       uses: CSVD/gh-actions-setup-terraform@v2
-      if: ${{ inputs.setup_terraform && env.TFE_TOKEN != '' }}
+      if: ${{ inputs.setup_terraform == 'true' && env.TFE_TOKEN != '' }}
       with:
         terraform_version: ${{ inputs.terraform_version }}
         cli_config_credentials_token: ${{ env.TFE_TOKEN }}
@@ -77,7 +67,7 @@ runs:
  
     - name: Setup Terraform
       uses: CSVD/gh-actions-setup-terraform@v2
-      if: ${{ inputs.setup_terraform && env.TFE_TOKEN == '' }}
+      if: ${{ inputs.setup_terraform== 'true' && env.TFE_TOKEN == '' }}
       with:
         terraform_version: ${{ inputs.terraform_version }}
 
@@ -89,7 +79,7 @@ runs:
 
     - name: Terraform Init
       id: init_state
-      if: ${{ inputs.terraform_init && inputs.state_bucket != '' }}
+      if: ${{ inputs.terraform_init == 'true' && inputs.state_bucket != '' }}
       shell: bash
       run: |
         terraform init -upgrade ${{ inputs.init_args }} \
@@ -100,7 +90,7 @@ runs:
     
     - name: Terraform Init
       id: init_no_state
-      if: ${{ inputs.terraform_init && inputs.state_bucket == '' }}
+      if: ${{ inputs.terraform_init== 'true' && inputs.state_bucket == '' }}
       shell: bash
       run: |
         terraform init -upgrade ${{ inputs.init_args }}
@@ -143,11 +133,17 @@ runs:
         
     - name: set s3 path (workspace)
       shell: bash
+      id: s3_path_upload_workspace
       if: ${{ inputs.workspace == '' }}
       run: echo "s3_upload_path=${{ github.repository }}/${{ steps.uuid.outputs.uuid  }}" >> $GITHUB_OUTPUT
       
     - name: set s3 path (non-workspace)
       shell: bash
+      id: s3_path_upload_non_workspace
       if: ${{ inputs.workspace != '' }}
       run: echo "s3_upload_path=${{ github.repository }}/${{ inputs.workspace }}/${{ steps.uuid.outputs.uuid }}" >> $GITHUB_OUTPUT
      
+    - name: set s3 path output
+      id: s3_path_upload
+      shell: bash
+      run: ${{ inputs.workspace == '' && steps.s3_path_upload_non_workspace.outputs.s3_upload_path || steps.s3_path_upload_workspace.outputs.s3_upload_path }}
