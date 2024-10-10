@@ -69,7 +69,7 @@ runs:
     
     - name: Setup Terraform
       uses: CSVD/gh-actions-setup-terraform@v2
-      if: ${{ inputs.setup_terraform && env.TFE_TOKEN != '' }}
+      if: ${{ inputs.setup_terraform == 'true' && env.TFE_TOKEN != '' }}
       with:
         terraform_version: ${{ inputs.terraform_version }}
         cli_config_credentials_token: ${{ env.TFE_TOKEN }}
@@ -77,7 +77,7 @@ runs:
  
     - name: Setup Terraform
       uses: CSVD/gh-actions-setup-terraform@v2
-      if: ${{ inputs.setup_terraform && env.TFE_TOKEN == '' }}
+      if: ${{ inputs.setup_terraform== 'true' && env.TFE_TOKEN == '' }}
       with:
         terraform_version: ${{ inputs.terraform_version }}
 
@@ -89,7 +89,7 @@ runs:
 
     - name: Terraform Init
       id: init_state
-      if: ${{ inputs.terraform_init && inputs.state_bucket != '' }}
+      if: ${{ inputs.terraform_ini t== 'true' && inputs.state_bucket != '' }}
       shell: bash
       run: |
         terraform init -upgrade ${{ inputs.init_args }} \
@@ -100,7 +100,7 @@ runs:
     
     - name: Terraform Init
       id: init_no_state
-      if: ${{ inputs.terraform_init && inputs.state_bucket == '' }}
+      if: ${{ inputs.terraform_init== 'true' && inputs.state_bucket == '' }}
       shell: bash
       run: |
         terraform init -upgrade ${{ inputs.init_args }}
