@@ -46,9 +46,9 @@ outputs:
   commit_sha:
     description: "Commit SHA"
     value: ${{ steps.checkout.outputs.commit }}
-   s3_upload_path:
-     description: "S3 Path for .terraform directory
-     value: ${{ steps.s3_upload_path.outputs.s3_upload_path }}
+  s3_upload_path:
+    description: "S3 Path for .terraform directory
+    value: ${{ steps.s3_upload_path.outputs.s3_upload_path }}
   
 runs:
   using: "composite"
