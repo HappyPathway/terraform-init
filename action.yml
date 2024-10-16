@@ -143,21 +143,21 @@ runs:
         archive: false
         key: ${{ github.repository }}/${{ steps.uuid.outputs.uuid }}/terraform.lock.hcl
 
-    - name: set s3 path (workspace)
+    - name: set s3 path (Non-Workspace)
       shell: bash
-      id: s3_path_upload_workspace
+      id: s3_path_upload_non_workspace
       if: ${{ inputs.workspace == '' }}
       run: |
         echo "s3_upload_path=${{ github.repository }}/${{ steps.uuid.outputs.uuid }}"
         echo "s3_upload_path=${{ github.repository }}/${{ steps.uuid.outputs.uuid }}" >> $GITHUB_ENV
         echo "s3_upload_path=${{ github.repository }}/${{ steps.uuid.outputs.uuid }}" >> $GITHUB_OUTPUT
 
-    - name: set s3 path (non-workspace)
+    - name: set s3 path (Workspace)
       shell: bash
-      id: s3_path_upload_non_workspace
+      id: s3_path_upload_workspace
       if: ${{ inputs.workspace != '' }}
       run: |
-        echo "s3_upload_path=${{ github.repository }}/${{ steps.uuid.outputs.uuid }}"
+        echo "s3_upload_path=${{ github.repository }}/${{ inputs.workspace }}/${{ steps.uuid.outputs.uuid }}"
         echo "s3_upload_path=${{ github.repository }}/${{ inputs.workspace }}/${{ steps.uuid.outputs.uuid }}" >> $GITHUB_ENV
         echo "s3_upload_path=${{ github.repository }}/${{ inputs.workspace }}/${{ steps.uuid.outputs.uuid }}" >> $GITHUB_OUTPUT
 
