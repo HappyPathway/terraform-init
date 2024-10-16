@@ -3,44 +3,45 @@ description: "Runs a Terraform Init"
 inputs:
   terraform_version:
     required: true
-    type: string
+    description: "Terraform Version"
   terraform_api:
     required: false
-    type: string
+    description: "Terraform API"
   workspace:
     required: false
-    type: string
+    description: "Terraform Workspace"
   varfile:
     required: false
-    type: string
+    description: "Terraform Varfile"
   setup_terraform:
-    type: boolean
-    default: false
+    default: "false"
+    description: "Setup Terraform"
   terraform_init:
-    type: boolean
-    default: false
+    default: "false"
+    description: "Run Terraform Init"
   state_bucket:
-    type: string
     required: false
+    description: "State Bucket"
   state_region:
-    type: string
     required: false
+    description: "State Region"
   state_prefix:
-    type: string
     required: false
+    description: "State Prefix"
   state_dynamodb_table:
-    type: string
     required: false
+    description: "State DynamoDB Table"
   init_args:
-    type: string
     required: false
+    description: "Terraform Init Args"
   commit_sha:
     required: false
-    type: string
+    default: ""
+    description: "Commit SHA"
   cache_bucket:
     required: false
-    type: string
     default: image-pipeline-assets
+    description: "Cache Bucket"
 
 outputs:
   commit_sha:
@@ -49,7 +50,7 @@ outputs:
   s3_upload_path:
     description: "S3 Path for .terraform directory"
     value: ${{ steps.s3_upload_path.outputs.s3_upload_path }}
-  
+
 runs:
   using: "composite"
   steps:
@@ -66,7 +67,7 @@ runs:
         uuid=$(cat /proc/sys/kernel/random/uuid)
         echo UUID: ${uuid}
         echo uuid=${uuid} >> $GITHUB_OUTPUT
-    
+
     - name: Setup Terraform
       uses: CSVD/gh-actions-setup-terraform@v2
       if: ${{ inputs.setup_terraform && env.TFE_TOKEN != '' }}
@@ -74,7 +75,7 @@ runs:
         terraform_version: ${{ inputs.terraform_version }}
         cli_config_credentials_token: ${{ env.TFE_TOKEN }}
         cli_config_credentials_hostname: ${{ inputs.terraform_api }}
- 
+
     - name: Setup Terraform
       uses: CSVD/gh-actions-setup-terraform@v2
       if: ${{ inputs.setup_terraform && env.TFE_TOKEN == '' }}
@@ -96,8 +97,8 @@ runs:
         -backend-config="bucket=${{ inputs.state_bucket }}" \
         -backend-config="key=${{ inputs.state_prefix }}" \
         -backend-config="region=${{ inputs.state_region }}" \
-        -backend-config="dynamodb_table=${{ inputs.dynamodb_table }}" 
-    
+        -backend-config="dynamodb_table=${{ inputs.dynamodb_table }}"
+
     - name: Terraform Init
       id: init_no_state
       if: ${{ inputs.terraform_init && inputs.state_bucket == '' }}
@@ -107,22 +108,22 @@ runs:
 
     - uses: CSVD/s3-upload@main
       name: Upload .terraform
-      if: ${{ inputs.workspace != '' }}
-      with:
-        source: .terraform
-        bucket: image-pipeline-assets
-        archive: true
-        key: ${{ github.repository }}/${{ inputs.workspace }}/${{ steps.uuid.outputs.uuid }}/terraform-dir
-        
-    - uses: CSVD/s3-upload@main
-      name: Upload .terraform
       if: ${{ inputs.workspace == '' }}
       with:
         source: .terraform
         bucket: image-pipeline-assets
         archive: true
+        key: ${{ github.repository }}/${{ inputs.workspace }}/${{ steps.uuid.outputs.uuid }}/terraform-dir
+
+    - uses: CSVD/s3-upload@main
+      name: Upload .terraform
+      if: ${{ inputs.workspace != '' }}
+      with:
+        source: .terraform
+        bucket: image-pipeline-assets
+        archive: true
         key: ${{ github.repository }}/${{ steps.uuid.outputs.uuid  }}/terraform-dir
-    
+
     - uses: CSVD/s3-upload@main
       name: Upload Terraform Lock File (Non-Workspace)
       if: ${{ inputs.workspace != '' }}
@@ -131,7 +132,7 @@ runs:
         bucket: image-pipeline-assets
         archive: false
         key: ${{ github.repository }}/${{ inputs.workspace }}/${{ steps.uuid.outputs.uuid }}/terraform.lock.hcl
-      
+
     - uses: CSVD/s3-upload@main
       name: Upload Terraform Lock File (Workspace)
       if: ${{ inputs.workspace == '' }}
@@ -140,14 +141,13 @@ runs:
         bucket: image-pipeline-assets
         archive: false
         key: ${{ github.repository }}/${{ steps.uuid.outputs.uuid }}/terraform.lock.hcl
-        
+
     - name: set s3 path (workspace)
       shell: bash
       if: ${{ inputs.workspace == '' }}
       run: echo "s3_upload_path=${{ github.repository }}/${{ steps.uuid.outputs.uuid  }}" >> $GITHUB_OUTPUT
-      
+
     - name: set s3 path (non-workspace)
-      shell: bash
       if: ${{ inputs.workspace != '' }}
+      shell: bash
       run: echo "s3_upload_path=${{ github.repository }}/${{ inputs.workspace }}/${{ steps.uuid.outputs.uuid }}" >> $GITHUB_OUTPUT
-     
