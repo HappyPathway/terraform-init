@@ -135,15 +135,21 @@ runs:
       shell: bash
       id: s3_path_upload_workspace
       if: ${{ inputs.workspace == '' }}
-      run: echo "s3_upload_path=${{ github.repository }}/${{ steps.uuid.outputs.uuid  }}" >> $GITHUB_OUTPUT
+      run: |
+        echo "s3_upload_path=${{ github.repository }}/${{ steps.uuid.outputs.uuid }}"
+        echo "s3_upload_path=${{ github.repository }}/${{ steps.uuid.outputs.uuid }}" >> $GITHUB_ENV
+        echo "s3_upload_path=${{ github.repository }}/${{ steps.uuid.outputs.uuid }}" >> $GITHUB_OUTPUT
       
     - name: set s3 path (non-workspace)
       shell: bash
       id: s3_path_upload_non_workspace
       if: ${{ inputs.workspace != '' }}
-      run: echo "s3_upload_path=${{ github.repository }}/${{ inputs.workspace }}/${{ steps.uuid.outputs.uuid }}" >> $GITHUB_OUTPUT
-     
-    - name: set s3 path output
-      id: s3_path_upload
+      run: |
+        echo "s3_upload_path=${{ github.repository }}/${{ steps.uuid.outputs.uuid }}"
+        echo "s3_upload_path=${{ github.repository }}/${{ inputs.workspace }}/${{ steps.uuid.outputs.uuid }}" >> $GITHUB_ENV
+        echo "s3_upload_path=${{ github.repository }}/${{ inputs.workspace }}/${{ steps.uuid.outputs.uuid }}" >> $GITHUB_OUTPUT
+   
+    - name: set output
+      id: s3_upload_path
       shell: bash
-      run: ${{ inputs.workspace == '' && steps.s3_path_upload_non_workspace.outputs.s3_upload_path || steps.s3_path_upload_workspace.outputs.s3_upload_path }}
+      run: echo "s3_upload_path=${{ env.s3_upload_path }}" >> $GITHUB_OUTPUT
