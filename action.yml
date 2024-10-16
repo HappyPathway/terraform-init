@@ -46,7 +46,7 @@ inputs:
 outputs:
   commit_sha:
     description: "Commit SHA"
-    value: ${{ steps.checkout.outputs.commit }}
+    value: ${{ inputs.commit_sha == '' && github.sha || inputs.commit_sha }}
   s3_upload_path:
     description: "S3 Path for .terraform directory"
     value: ${{ steps.s3_upload_path.outputs.s3_upload_path }}
@@ -55,6 +55,7 @@ runs:
   using: "composite"
   steps:
     - uses: CSVD/gh-actions-checkout@v4
+      if: ${{ inputs.checkout == 'true' }}
       id: checkout
       with:
         ref: ${{ inputs.commit_sha == '' && github.sha || inputs.commit_sha }}
@@ -70,7 +71,7 @@ runs:
 
     - name: Setup Terraform
       uses: CSVD/gh-actions-setup-terraform@v2
-      if: ${{ inputs.setup_terraform && env.TFE_TOKEN != '' }}
+      if: ${{ inputs.setup_terraform == 'true' && env.TFE_TOKEN != '' }}
       with:
         terraform_version: ${{ inputs.terraform_version }}
         cli_config_credentials_token: ${{ env.TFE_TOKEN }}
@@ -78,7 +79,7 @@ runs:
 
     - name: Setup Terraform
       uses: CSVD/gh-actions-setup-terraform@v2
-      if: ${{ inputs.setup_terraform && env.TFE_TOKEN == '' }}
+      if: ${{ inputs.setup_terraform== 'true' && env.TFE_TOKEN == '' }}
       with:
         terraform_version: ${{ inputs.terraform_version }}
 
@@ -90,7 +91,7 @@ runs:
 
     - name: Terraform Init
       id: init_state
-      if: ${{ inputs.terraform_init && inputs.state_bucket != '' }}
+      if: ${{ inputs.terraform_init == 'true' && inputs.state_bucket != '' }}
       shell: bash
       run: |
         terraform init -upgrade ${{ inputs.init_args }} \
@@ -101,7 +102,7 @@ runs:
 
     - name: Terraform Init
       id: init_no_state
-      if: ${{ inputs.terraform_init && inputs.state_bucket == '' }}
+      if: ${{ inputs.terraform_init== 'true' && inputs.state_bucket == '' }}
       shell: bash
       run: |
         terraform init -upgrade ${{ inputs.init_args }}
@@ -144,10 +145,23 @@ runs:
 
     - name: set s3 path (workspace)
       shell: bash
+      id: s3_path_upload_workspace
       if: ${{ inputs.workspace == '' }}
-      run: echo "s3_upload_path=${{ github.repository }}/${{ steps.uuid.outputs.uuid  }}" >> $GITHUB_OUTPUT
+      run: |
+        echo "s3_upload_path=${{ github.repository }}/${{ steps.uuid.outputs.uuid }}"
+        echo "s3_upload_path=${{ github.repository }}/${{ steps.uuid.outputs.uuid }}" >> $GITHUB_ENV
+        echo "s3_upload_path=${{ github.repository }}/${{ steps.uuid.outputs.uuid }}" >> $GITHUB_OUTPUT
 
     - name: set s3 path (non-workspace)
-      if: ${{ inputs.workspace != '' }}
       shell: bash
-      run: echo "s3_upload_path=${{ github.repository }}/${{ inputs.workspace }}/${{ steps.uuid.outputs.uuid }}" >> $GITHUB_OUTPUT
+      id: s3_path_upload_non_workspace
+      if: ${{ inputs.workspace != '' }}
+      run: |
+        echo "s3_upload_path=${{ github.repository }}/${{ steps.uuid.outputs.uuid }}"
+        echo "s3_upload_path=${{ github.repository }}/${{ inputs.workspace }}/${{ steps.uuid.outputs.uuid }}" >> $GITHUB_ENV
+        echo "s3_upload_path=${{ github.repository }}/${{ inputs.workspace }}/${{ steps.uuid.outputs.uuid }}" >> $GITHUB_OUTPUT
+
+    - name: set output
+      id: s3_upload_path
+      shell: bash
+      run: echo "s3_upload_path=${{ env.s3_upload_path }}" >> $GITHUB_OUTPUT
